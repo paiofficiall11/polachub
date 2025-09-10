@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="polac_hub">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>polac_hub</title>
+  <link rel="manifest" href="manifest.json">
+  <base href="$FLUTTER_BASE_HREF">
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+      color: #00ff00;
+      font-family: Arial, sans-serif;
+    }
+
+    /* center everything */
+    .center {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loader {
+      width: 70px;
+      height: 70px;
+      border: 6px solid #222;
+      border-top-color: #00ff00;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      box-sizing: border-box;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .text {
+      margin-top: 16px;
+      color: #00ff00;
+      font-size: 19px;
+      text-align: center;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="center" id="loader">
+    <div class="loader" role="status" aria-label="Loading"></div>
+    <div class="text">Polac Hub</div>
+  </div>
+
+  <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    function hideLoader() {
+      var loadingElement = document.getElementById('loader');
+      if (loadingElement) {
+        loadingElement.style.display = 'none';
+      }
+    }
+
+    // Hide when the page is fully loaded
+   
+
+    // Also hide when Flutter paints its first frame
+    window.addEventListener('flutter-first-frame', hideLoader);
+  </script>
+</body>
+</html>
