@@ -146,7 +146,7 @@ class AppwriteService {
   Future<void> sendVerificationEmail() async {
     try {
       await account.createVerification(
-        url: 'localhost',
+        url: 'polachub.appwrite.network',
       );
     } on AppwriteException catch (e) {
       print('Send verification email error: ${e.message}');
@@ -171,7 +171,7 @@ class AppwriteService {
     try {
       await account.createRecovery(
         email: email,
-        url: '${"localhost"}/reset-password',
+        url: '${"polachub.appwrite.network"}/reset-password',
       );
     } on AppwriteException catch (e) {
       print('Password reset email error: ${e.message}');
@@ -227,10 +227,7 @@ class AppwriteService {
           'joinedAt': DateTime.now().toIso8601String(),
           'lastActive': DateTime.now().toIso8601String(),
           'isVerified': false,
-          'settings': {
-            'notifications': true,
-            'privacy': 'public',
-          },
+          'notifications': false
         },
         permissions: [
           Permission.read(Role.any()),

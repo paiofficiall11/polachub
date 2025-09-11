@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import '../controllers/AppwriteController.dart';
 import 'package:polac_hub/ui/button.dart';
@@ -28,6 +29,7 @@ class _SignUpState extends State<SignUp> {
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   late final TextEditingController _phoneController;
+ late final TextEditingController _courseController;
 
   @override
   void initState() {
@@ -37,6 +39,7 @@ class _SignUpState extends State<SignUp> {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _phoneController = TextEditingController();
+     _courseController = TextEditingController();
   }
 
   @override
@@ -46,6 +49,7 @@ class _SignUpState extends State<SignUp> {
     _emailController.dispose();
     _passwordController.dispose();
     _phoneController.dispose();
+    _courseController.dispose();
     super.dispose();
   }
 
@@ -101,9 +105,73 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                   keyboardType: TextInputType.name,
-                  maxLength: 35,
+                  
+                   maxLength: 35,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 17, 
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white
+                  ),
                 ),
                 const SizedBox(height: 16),
+
+
+
+
+
+
+
+
+
+ TextFormField(
+                  controller: _courseController,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please add your course';
+                    }
+                    if (value.trim().length < 2) {
+                      return 'Course must be at least 3 characters';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText: "Course",
+                    prefixIcon: const Icon(
+                      FontAwesome.address_card,
+                      size: 16,
+                      color: Colors.greenAccent,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: Colors.greenAccent,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                  keyboardType: TextInputType.name,
+                  
+                   maxLength: 15,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 17, 
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+
+
+
+
+
+
+
+
+
                 
                 // Email TextField
                 TextFormField(
@@ -138,6 +206,11 @@ class _SignUpState extends State<SignUp> {
                   ),
                   keyboardType: TextInputType.emailAddress,
                   maxLength: 35,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 17, 
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white
+                  ),
                 ),
                 const SizedBox(height: 16),
                 
@@ -174,6 +247,11 @@ class _SignUpState extends State<SignUp> {
                   keyboardType: TextInputType.visiblePassword,
                   obscureText: true,
                   maxLength: 35,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 17, 
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white
+                  ),
                 ),
                 const SizedBox(height: 16),
                 
@@ -209,7 +287,12 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                   keyboardType: TextInputType.phone,
-                  maxLength: 35,
+                 maxLength: 35,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 17, 
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white
+                  ),
                 ),
                 const SizedBox(height: 24),
                 
@@ -267,7 +350,7 @@ class _SignUpState extends State<SignUp> {
         password: _passwordController.text,
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
-        course: '', // You might want to add a course field or set a default
+        course: _courseController.text.trim(), // You might want to add a course field or set a default
       );
     }
   }
