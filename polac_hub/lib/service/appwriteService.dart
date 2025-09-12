@@ -10,52 +10,39 @@ import '../config/environment.dart';
 /// This service manages authentication, user data, posts, Q&A, and comments
 /// Updated with latest Appwrite SDK methods and best practices
 class AppwriteService {
-  // Singleton pattern for service instance
-  static final AppwriteService _instance = AppwriteService._internal();
   factory AppwriteService() => _instance;
+
   AppwriteService._internal() {
     _initializeAppwrite();
   }
 
-  // Appwrite client initialization
-  late Client client;
-  
-  // Service instances
-  late Account account;
-  late Databases databases;
-  late Storage storage;
-  late Realtime realtime;
-  late Functions functions;
-  late Teams teams;
-  late Avatars avatars;
-
+  static const String COMMENTS_COLLECTION = 'comments';
   // Database and collection IDs
   static const String DATABASE_ID = '68c14782000ebb74016f';
-  static const String USERS_COLLECTION = 'users';
+
   static const String POSTS_COLLECTION = 'posts';
-  static const String QA_COLLECTION = 'q_a';
-  static const String COMMENTS_COLLECTION = 'comments';
-  
+  static const String POST_IMAGES_BUCKET = 'polac_hub';
   // Storage bucket IDs (if needed)
   static const String PROFILE_IMAGES_BUCKET = 'polac_hub';
-  static const String POST_IMAGES_BUCKET = 'polac_hub';
 
-  /// Setup Appwrite client with project configuration
-  void _initializeAppwrite() {
-    client = Client()
-      .setEndpoint(Environment.appwritePublicEndpoint.trim())
-      .setProject(Environment.appwriteProjectId)
-      .setSelfSigned(status: true); // Updated method signature
+  static const String QA_COLLECTION = 'q_a';
+  static const String USERS_COLLECTION = 'users';
 
-    // Initialize all service instances
-    account = Account(client);
-    databases = Databases(client);
-    storage = Storage(client);
-    realtime = Realtime(client);
-    functions = Functions(client);
-    teams = Teams(client);
-    avatars = Avatars(client);
-  }
+  // Service instances
+  late Account account;
+
+  late Avatars avatars;
+  // Appwrite client initialization
+  late Client client;
+
+  late Databases databases;
+  late Functions functions;
+  late Realtime realtime;
+  late Storage storage;
+  late Teams teams;
+
+  // Singleton pattern for service instance
+  static final AppwriteService _instance = AppwriteService._internal();
 
   // ┌─────────────────────────────────────────────────────────────┐
   // │                    AUTHENTICATION METHODS                   │
@@ -119,8 +106,6 @@ class AppwriteService {
       rethrow;
     }
   }
-
-
 
   /// User logout - deletes current session
   Future<void> logout() async {
@@ -193,50 +178,6 @@ class AppwriteService {
       );
     } on AppwriteException catch (e) {
       print('Password reset error: ${e.message}');
-      rethrow;
-    }
-  }
-
-  // ┌─────────────────────────────────────────────────────────────┐
-  // │                     USER DATA METHODS                       │
-  // └─────────────────────────────────────────────────────────────┘
-
-  /// Create user document in database after successful registration
-  Future<models.Document> _createUserDocument({
-    required String userId,
-    required String name,
-    required String email,
-    required String phone,
-    required String course,
-  }) async {
-    try {
-      return await databases.createDocument(
-        databaseId: DATABASE_ID,
-        collectionId: USERS_COLLECTION,
-        documentId: userId,
-        data: {
-          'name': name,
-          'email': email,
-          'phone': phone,
-          'course': course,
-          'bookmarks': [],
-          'role': 'student',
-          'userId': userId,
-          'profileImage': null,
-          'bio': '',
-          'joinedAt': DateTime.now().toIso8601String(),
-          'lastActive': DateTime.now().toIso8601String(),
-          'isVerified': false,
-          'notifications': false
-        },
-        permissions: [
-          Permission.read(Role.any()),
-          Permission.update(Role.any()),
-          Permission.delete(Role.any()),
-        ],
-      );
-    } on AppwriteException catch (e) {
-      print('User document creation error: ${e.message}');
       rethrow;
     }
   }
@@ -925,6 +866,67 @@ class AppwriteService {
       );
     } on AppwriteException catch (e) {
       print('Execute function error: ${e.message}');
+      rethrow;
+    }
+  }
+
+  /// Setup Appwrite client with project configuration
+  void _initializeAppwrite() {
+    client = Client()
+      .setEndpoint(Environment.appwritePublicEndpoint.trim())
+      .setProject(Environment.appwriteProjectId)
+      .setSelfSigned(status: true); // Updated method signature
+
+    // Initialize all service instances
+    account = Account(client);
+    databases = Databases(client);
+    storage = Storage(client);
+    realtime = Realtime(client);
+    functions = Functions(client);
+    teams = Teams(client);
+    avatars = Avatars(client);
+  }
+
+  // ┌─────────────────────────────────────────────────────────────┐
+  // │                     USER DATA METHODS                       │
+  // └─────────────────────────────────────────────────────────────┘
+
+  /// Create user document in database after successful registration
+  Future<models.Document> _createUserDocument({
+    required String userId,
+    required String name,
+    required String email,
+    required String phone,
+    required String course,
+  }) async {
+    try {
+      return await databases.createDocument(
+        databaseId: DATABASE_ID,
+        collectionId: USERS_COLLECTION,
+        documentId: userId,
+        data: {
+          'name': name,
+          'email': email,
+          'phone': phone,
+          'course': course,
+          'bookmarks': [],
+          'role': 'student',
+          'userId': userId,
+          'profileImage': null,
+          'bio': '',
+          'joinedAt': DateTime.now().toIso8601String(),
+          'lastActive': DateTime.now().toIso8601String(),
+          'isVerified': false,
+          'notifications': false
+        },
+        permissions: [
+          Permission.read(Role.any()),
+          Permission.update(Role.any()),
+          Permission.delete(Role.any()),
+        ],
+      );
+    } on AppwriteException catch (e) {
+      print('User document creation error: ${e.message}');
       rethrow;
     }
   }
