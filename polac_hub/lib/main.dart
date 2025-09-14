@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:polac_hub/pages/dashboard.dart';
 import 'package:polac_hub/pages/forgot_page.dart';
 import 'package:polac_hub/pages/login.dart';
+import 'package:polac_hub/pages/post_page.dart';
 import 'package:polac_hub/pages/sign_up.dart';
 
 void main() {
@@ -64,6 +65,14 @@ class MyApp extends StatelessWidget {
           page: () => const Dashboard(),
           transition: Transition.rightToLeft,
           transitionDuration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        ),
+
+         GetPage(
+          name: '/post',
+          page: () => const Post(),
+          transition: Transition.downToUp,
+          transitionDuration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         ),
       ],

@@ -7,7 +7,6 @@ import 'package:polac_hub/ui/button.dart';
 import 'package:polac_hub/ui/primary_header.dart';
 import 'package:polac_hub/ui/secondary_header.dart';
 import 'package:polac_hub/ui/smallText.dart';
-import 'package:polac_hub/ui/textField.dart';
 import "../ui/logoNormal.dart";
 
 class SignUp extends StatefulWidget {
@@ -20,16 +19,16 @@ class SignUp extends StatefulWidget {
 class _SignUpState extends State<SignUp> {
   // Get the controller instance
   late final AppwriteController _controller;
-  
+
   // Form key for validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
+
   // Text editing controllers
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   late final TextEditingController _phoneController;
- late final TextEditingController _courseController;
+  late final TextEditingController _courseController;
 
   @override
   void initState() {
@@ -39,7 +38,7 @@ class _SignUpState extends State<SignUp> {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _phoneController = TextEditingController();
-     _courseController = TextEditingController();
+    _courseController = TextEditingController();
   }
 
   @override
@@ -73,7 +72,7 @@ class _SignUpState extends State<SignUp> {
                       "Get all the latest updates, become a member of the Polac community.",
                 ),
                 const SizedBox(height: 30),
-                
+
                 // Name TextField
                 TextFormField(
                   controller: _nameController,
@@ -105,25 +104,17 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                   keyboardType: TextInputType.name,
-                  
-                   maxLength: 35,
+
+                  maxLength: 35,
                   style: GoogleFonts.montserrat(
-                    fontSize: 17, 
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
 
-
-
-
-
-
-
-
-
- TextFormField(
+                TextFormField(
                   controller: _courseController,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -153,26 +144,16 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                   keyboardType: TextInputType.name,
-                  
-                   maxLength: 15,
+
+                  maxLength: 15,
                   style: GoogleFonts.montserrat(
-                    fontSize: 17, 
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
 
-
-
-
-
-
-
-
-
-
-                
                 // Email TextField
                 TextFormField(
                   controller: _emailController,
@@ -180,7 +161,9 @@ class _SignUpState extends State<SignUp> {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter your email';
                     }
-                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    final emailRegex = RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    );
                     if (!emailRegex.hasMatch(value.trim())) {
                       return 'Please enter a valid email';
                     }
@@ -207,13 +190,13 @@ class _SignUpState extends State<SignUp> {
                   keyboardType: TextInputType.emailAddress,
                   maxLength: 35,
                   style: GoogleFonts.montserrat(
-                    fontSize: 17, 
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Password TextField
                 TextFormField(
                   controller: _passwordController,
@@ -248,13 +231,13 @@ class _SignUpState extends State<SignUp> {
                   obscureText: true,
                   maxLength: 35,
                   style: GoogleFonts.montserrat(
-                    fontSize: 17, 
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Phone TextField
                 TextFormField(
                   controller: _phoneController,
@@ -287,15 +270,15 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                   keyboardType: TextInputType.phone,
-                 maxLength: 35,
+                  maxLength: 35,
                   style: GoogleFonts.montserrat(
-                    fontSize: 17, 
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: InkWell(
@@ -306,18 +289,20 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                
+
                 // Sign Up Button with Obx for loading state
-                Obx(() => Button(
-                  onTap: _controller.isLoading ? null : _handleSignUp,
-                  text: "Sign Up",
-                  height: 55,
-                  width: Get.width * 0.9,
-                  color: const Color.fromARGB(255, 51, 119, 86),
-                  loading: _controller.isLoading,
-                )),
+                Obx(
+                  () => Button(
+                    onTap: _controller.isLoading ? null : _handleSignUp,
+                    text: "Sign Up",
+                    height: 55,
+                    width: Get.width * 0.9,
+                    color: const Color.fromARGB(255, 51, 119, 86),
+                    loading: _controller.isLoading,
+                  ),
+                ),
                 const SizedBox(height: 40),
-                
+
                 // Already have account link
                 InkWell(
                   onTap: () {
@@ -327,9 +312,7 @@ class _SignUpState extends State<SignUp> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Smalltext(text: "Already have an account? "),
-                      const Smalltext(
-                        text: "Sign In",
-                      ),
+                      const Smalltext(text: "Sign In"),
                     ],
                   ),
                 ),
@@ -350,7 +333,8 @@ class _SignUpState extends State<SignUp> {
         password: _passwordController.text,
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
-        course: _courseController.text.trim(), // You might want to add a course field or set a default
+        course: _courseController.text
+            .trim(), // You might want to add a course field or set a default
       );
     }
   }

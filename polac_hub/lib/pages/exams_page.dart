@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:polac_hub/ui/button.dart';
 import 'package:polac_hub/ui/primary_header.dart';
-import 'package:polac_hub/ui/secondary_header.dart';
 
 class ExamsPage extends StatelessWidget {
   const ExamsPage({super.key});
