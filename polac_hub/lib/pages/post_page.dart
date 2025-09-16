@@ -1,11 +1,13 @@
 import 'dart:typed_data';
-import 'dart:ui';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/AppwriteController.dart';
+
 
 class Post extends StatefulWidget {
   const Post({super.key});
@@ -15,7 +17,7 @@ class Post extends StatefulWidget {
 }
 
 class _PostState extends State<Post> with TickerProviderStateMixin {
-  final AppwriteController controller = Get.find<AppwriteController>();
+  late AppwriteController controller;
 
   final TextEditingController _textController = TextEditingController();
   final TextEditingController _tagsController = TextEditingController();
@@ -39,6 +41,9 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    
+    // Initialize controller properly for web
+    controller = Get.find<AppwriteController>();
 
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -97,11 +102,21 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
       );
 
       if (pickedFile != null) {
-        final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          _selectedImageBytes = bytes;
-          _selectedImageName = pickedFile.name;
-        });
+        // Handle web file reading properly
+        if (kIsWeb) {
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _selectedImageBytes = bytes;
+            _selectedImageName = pickedFile.name;
+          });
+        } else {
+          // For mobile, read bytes normally
+          final bytes = await pickedFile.readAsBytes();
+          setState(() {
+            _selectedImageBytes = bytes;
+            _selectedImageName = pickedFile.name;
+          });
+        }
         _showSuccessFeedback('Image added successfully!');
       }
     } catch (e) {
@@ -112,7 +127,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   Future<void> _takePicture() async {
     try {
       if (kIsWeb) {
-        _showErrorSnackbar('Camera Access', 'Camera access may be limited on web. Please use gallery instead.');
+        _showErrorSnackbar('Camera Access', 'Camera access is not available on web. Please use gallery instead.');
         return;
       }
 
@@ -184,24 +199,28 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
         imageBytes: _selectedImageBytes,
         imageName: _selectedImageName,
         tags: _tags.isEmpty ? null : _tags,
+        
+        authorName: controller.currentUser?.name ?? 'Anonymous',
       );
 
-      if (Get.isDialogOpen ?? false) {
+      // Check if dialog is open before trying to close it
+      if (Get.isDialogOpen == true) {
         Get.back();
       }
 
       if (success) {
         _showSuccessDialog();
         await Future.delayed(const Duration(milliseconds: 1500));
-        if (Get.isDialogOpen ?? false) {
+        if (Get.isDialogOpen == true) {
           Get.back();
         }
-        Get.back();
+        Get.back(); // Navigate back to previous screen
       } else {
         _showErrorSnackbar('Post Creation Failed', controller.hasError ? controller.errorMessage : 'Something went wrong. Please try again.');
       }
     } catch (e) {
-      if (Get.isDialogOpen ?? false) {
+      // Check if dialog is open before trying to close it
+      if (Get.isDialogOpen == true) {
         Get.back();
       }
       _showErrorSnackbar('Post Creation Failed', e.toString());
@@ -225,7 +244,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
       PopScope(
         canPop: false,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Center(
             child: Container(
               padding: const EdgeInsets.all(24),
@@ -262,7 +281,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   void _showSuccessDialog() {
     Get.dialog(
       BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Center(
           child: Container(
             margin: const EdgeInsets.all(24),
@@ -389,40 +408,46 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
         "Create Post",
         style: GoogleFonts.orbitron(
           color: Colors.white,
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
+          fontSize: 17,
+          fontWeight: FontWeight.w500,
           letterSpacing: 1.2,
         ),
       ),
       centerTitle: true,
       actions: [
-        Obx(() => AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          margin: const EdgeInsets.only(right: 16),
-          child: ElevatedButton(
-            onPressed: (controller.isLoading || !_isPostValid) ? null : _createPost,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _isPostValid && !controller.isLoading
-                  ? Colors.greenAccent
-                  : Colors.grey.withOpacity(0.5),
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
+        GetBuilder<AppwriteController>(
+          builder: (controller) {
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.only(right: 16),
+              child: ElevatedButton(
+                onPressed: (controller.isLoading || !_isPostValid) ? null : _createPost,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isPostValid && !controller.isLoading
+                      ? Colors.greenAccent
+                      : Colors.grey.withOpacity(0.5),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 19, vertical: 19),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  elevation: _isPostValid ? 8 : 0,
+                  shadowColor: Colors.greenAccent.withOpacity(0.5),
+                  disabledBackgroundColor: Colors.grey.withOpacity(0.3),
+                  disabledForegroundColor: Colors.grey,
+                ),
+                child: Text(
+                  controller.isLoading ? "Posting..." : "Post",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
               ),
-              elevation: _isPostValid ? 8 : 0,
-              shadowColor: Colors.greenAccent.withOpacity(0.5),
-            ),
-            child: Text(
-              controller.isLoading ? "Posting..." : "Post",
-              style: GoogleFonts.orbitron(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
-              ),
-            ),
-          ),
-        )),
+            );
+          },
+        ),
       ],
     );
   }
@@ -432,107 +457,109 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
       opacity: _fadeAnimation,
       child: SlideTransition(
         position: _slideAnimation,
-        child: Obx(() {
-          final userInfo = controller.currentUserInfo;
-          final userName = userInfo?.data['name'] ?? controller.currentUser?.name ?? 'Unknown User';
-          final userCourse = userInfo?.data['course'] ?? 'Student';
-          final profileImageId = userInfo?.data['profileImage'];
+        child: GetBuilder<AppwriteController>(
+          builder: (controller) {
+            final userInfo = controller.currentUserInfo;
+            final userName = userInfo?.data['name'] ?? controller.currentUser?.name ?? 'Unknown User';
+            final userCourse = userInfo?.data['course'] ?? 'Student';
+            final profileImageId = userInfo?.data['profileImage'];
 
-          return Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF1A1A1A).withOpacity(0.8),
-                  const Color(0xFF2A2A2A).withOpacity(0.6),
+            return Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF1A1A1A).withOpacity(0.8),
+                    const Color(0xFF2A2A2A).withOpacity(0.6),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.greenAccent.withOpacity(0.3),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.greenAccent.withOpacity(0.1),
+                    blurRadius: 20,
+                    spreadRadius: 1,
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.greenAccent.withOpacity(0.3),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.greenAccent.withOpacity(0.1),
-                  blurRadius: 20,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                _buildProfileAvatar(userName, profileImageId),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              userName,
-                              style: GoogleFonts.orbitron(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+              child: Row(
+                children: [
+                  _buildProfileAvatar(userName, profileImageId),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                userName,
+                                style: GoogleFonts.orbitron(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: const BoxDecoration(
-                              color: Colors.greenAccent,
-                              shape: BoxShape.circle,
+                            const SizedBox(width: 8),
+                            if(controller.isAuthenticated) Container(
+                              padding: const EdgeInsets.all(1),
+                              decoration: const BoxDecoration(
+                                color: Colors.greenAccent,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(HeroIcons.check_badge, color: Colors.black, size: 14),
                             ),
-                            child: const Icon(Icons.verified, color: Colors.black, size: 16),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        userCourse,
-                        style: GoogleFonts.montserrat(
-                          color: Colors.greenAccent.withOpacity(0.8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.public, color: Colors.grey, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Anyone can reply',
-                            style: GoogleFonts.montserrat(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
+                        const SizedBox(height: 4),
+                        Text(
+                          userCourse,
+                          style: GoogleFonts.montserrat(
+                            color: Colors.greenAccent.withOpacity(0.8),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.public, color: Colors.grey, size: 16),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Anyone can reply',
+                              style: GoogleFonts.montserrat(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        }),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
   Widget _buildProfileAvatar(String userName, String? profileImageId) {
     return Container(
-      width: 60,
-      height: 60,
+      width: 45,
+      height: 45,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: Colors.greenAccent, width: 2),
@@ -641,7 +668,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                 controller: _textController,
                 focusNode: _textFocus,
                 maxLines: null,
-                minLines: kIsWeb ? 6 : 8,
+                minLines: kIsWeb ? 8 : 6,
                 style: GoogleFonts.montserrat(
                   color: Colors.white,
                   fontSize: 16,
@@ -663,7 +690,10 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (_tags.isNotEmpty) Expanded(child: _buildTagsDisplay()),
+                        if (_tags.isNotEmpty) 
+                          Expanded(
+                            child: _buildTagsDisplay(),
+                          ),
                         Text(
                           '$currentLength/${maxLength ?? 1000}',
                           style: GoogleFonts.montserrat(
@@ -727,7 +757,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
     if (_selectedImageBytes == null) return const SizedBox();
 
     return Container(
-      height: kIsWeb ? 200 : 250,
+      height: kIsWeb ? 250 : 200,
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -802,7 +832,11 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
             color: Colors.white,
             fontSize: 15,
           ),
-          onSubmitted: _addTag,
+          onSubmitted: (value) {
+            if (value.isNotEmpty) {
+              _addTag(value);
+            }
+          },
           decoration: InputDecoration(
             hintText: "Add tags and press Enter (max 10)",
             hintStyle: GoogleFonts.montserrat(
@@ -861,7 +895,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
               child: _mediaButton(
                 icon: Icons.camera_alt,
                 label: "Camera",
-                onTap: _takePicture,
+                onTap: kIsWeb ? null : _takePicture,
                 color: kIsWeb ? Colors.grey : Colors.blueAccent,
                 isDisabled: kIsWeb,
               ),
@@ -875,7 +909,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   Widget _mediaButton({
     required IconData icon,
     required String label,
-    required VoidCallback onTap,
+    VoidCallback? onTap,
     required Color color,
     bool isDisabled = false,
   }) {
@@ -917,6 +951,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -928,7 +963,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: _appBar(), // Removed extendBodyBehindAppBar
+      appBar: _appBar(),
       body: Stack(
         children: [
           // Background gradient
@@ -949,57 +984,63 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
             ),
           ),
 
-          // Content wrapped in SafeArea + SingleChildScrollView
+          // Content
           SafeArea(
-            child: SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height - kToolbarHeight - 40, // Ensure scrollable area
-                ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    _profile(),
-                    const SizedBox(height: 16),
-                    _postTextField(),
-                    const SizedBox(height: 16),
-                    _tagsInput(),
-                    const SizedBox(height: 16),
-                    _mediaButtons(),
-                    const SizedBox(height: 32),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight > 0 
+                          ? constraints.maxHeight - kToolbarHeight - MediaQuery.of(context).padding.top
+                          : 600,
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        _profile(),
+                        const SizedBox(height: 16),
+                        _postTextField(),
+                        const SizedBox(height: 16),
+                        _tagsInput(),
+                        const SizedBox(height: 16),
+                        _mediaButtons(),
+                        const SizedBox(height: 32),
 
-                    // Clear form button
-                    if (_textController.text.isNotEmpty ||
-                        _selectedImageBytes != null ||
-                        _tags.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: _clearForm,
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: Colors.red.withOpacity(0.5)),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: Text(
-                              'Clear Form',
-                              style: GoogleFonts.montserrat(
-                                color: Colors.red,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                        // Clear form button
+                        if (_textController.text.isNotEmpty ||
+                            _selectedImageBytes != null ||
+                            _tags.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton(
+                                onPressed: _clearForm,
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(color: Colors.red.withOpacity(0.5)),
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Clear Form',
+                                  style: GoogleFonts.montserrat(
+                                    color: Colors.red,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    const SizedBox(height: 32),
-                  ],
-                ),
-              ),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],

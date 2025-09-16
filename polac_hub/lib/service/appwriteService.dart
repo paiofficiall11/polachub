@@ -19,8 +19,8 @@ class AppwriteService {
   static const String COMMENTS_COLLECTION = 'comments';
   static const String DATABASE_ID = '68c14782000ebb74016f';
   static const String POSTS_COLLECTION = 'posts';
-  static const String POST_IMAGES_BUCKET = 'polac_hub';
-  static const String PROFILE_IMAGES_BUCKET = 'polac_hub';
+  static const String POST_IMAGES_BUCKET = '68c1bb4f00366cb7b6b4';
+  static const String PROFILE_IMAGES_BUCKET = '68c1bb4f00366cb7b6b4';
   static const String QA_COLLECTION = 'q_a';
   static const String USERS_COLLECTION = 'users';
 
@@ -274,12 +274,14 @@ class AppwriteService {
 
   /// Enhanced createPost with web-compatible file upload
   Future<models.Document> createPost({
+    required String authorName,
     required String authorId,
     required String text,
     Uint8List? imageBytes,
     String? imageName,
     List<String>? tags,
     required DateTime createdDate,
+    
   }) async {
     try {
       String? imageId;
@@ -304,6 +306,7 @@ class AppwriteService {
         documentId: ID.unique(),
         data: {
           'authorId': authorId,
+          'authorName': authorName,
           'text': text,
           'imageId': imageId,
           'tags': tags ?? [],

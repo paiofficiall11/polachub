@@ -18,7 +18,7 @@ class _DashboardState extends State<Dashboard> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    const Home(),
+    const HomePage(),
     const ExplorePage(),
     const ExamsPage()
   ];

@@ -374,9 +374,11 @@ class AppwriteController extends GetxController {
 
   Future<bool> createPost({
     required String text,
+    required String authorName,
     Uint8List? imageBytes,
     String? imageName,
     List<String>? tags,
+
   }) async {
     try {
       if (_currentUser.value == null) return false;
@@ -387,6 +389,7 @@ class AppwriteController extends GetxController {
       final post = await _appwriteService.createPost(
         authorId: _currentUser.value!.$id,
         text: text,
+        authorName: _currentUser.value?.name ?? 'Anonymous',
         imageBytes: imageBytes,
         imageName: imageName,
         tags: tags,
